@@ -25,7 +25,7 @@ const SignUpPage: React.FC = () => {
         <div className="bg-white border border-gray-200 shadow-sm rounded-lg p-6">
           <SignUpForm />
           <p className="mt-4 text-sm text-center text-gray-600">
-            Already have an account? <Link to="/" className="text-black font-medium underline">Sign in</Link>
+            Already have an account? <Link to="/signin" className="text-black font-medium underline">Sign in</Link>
           </p>
         </div>
 
