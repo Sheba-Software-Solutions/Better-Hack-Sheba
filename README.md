@@ -42,7 +42,8 @@ As Ethiopia adopts **Decentralized Identifiers (DID)** and **W3C Verifiable Cred
 - 🌍 Solves **real Ethiopian pain point**: hard-to-verify documents.  
 - 🔒 Builds on **BetterAuth** for secure, modern authentication.  
 - 🪪 Bridges **today’s PDFs** to **tomorrow’s verifiable credentials**.  
-- 🚀 Future-ready for **Web3 identity & global interoperability**.  
+- 🚀 Future-ready for **Web3 identity & global interoperability**.
+- 🆔 Leverages **Fayda (NID) live verification** to boost trust and security.  
 
 ---
 
