@@ -1,5 +1,8 @@
 from django.db import models
 from django.conf import settings
+import hashlib
+import pytesseract
+from PIL import Image
 
 
 class Document(models.Model):
@@ -26,16 +29,32 @@ class Document(models.Model):
 
     def __str__(self):
         return f"{self.document_type} for {self.user.email}"
+
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         super().save(*args, **kwargs)
-        if is new and not self.document_hash:
-            self.document_file.open('rb')
+
+        if is_new and not self.document_hash:
+            self.document_file.open("rb")
             file_content = self.document_file.read()
 
             sha256_hash = hashlib.sha256()
             sha256_hash.update(file_content)
             self.document_hash = sha256_hash.hexdigest()
+
+            try:
+                self.extracted_text = pytesseract.image_to_string(
+                    Image.open(self.document_file.path)
+                )
+            except Exception as e:
+                print(f"Error during OCR: {e}")
+                self.extracted_text = "OCR failed for this document."
+
+            self.document_file.close()
+
+            super().save(
+                update_fields=["document_hash", "extracted_text", "updated_at"]
+            )
 
 
 class VerifiableCredential(models.Model):
