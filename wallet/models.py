@@ -26,6 +26,16 @@ class Document(models.Model):
 
     def __str__(self):
         return f"{self.document_type} for {self.user.email}"
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is new and not self.document_hash:
+            self.document_file.open('rb')
+            file_content = self.document_file.read()
+
+            sha256_hash = hashlib.sha256()
+            sha256_hash.update(file_content)
+            self.document_hash = sha256_hash.hexdigest()
 
 
 class VerifiableCredential(models.Model):
