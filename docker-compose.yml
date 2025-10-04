@@ -1,0 +1,50 @@
+# We're using version 3.8 of the Docker Compose file format.
+version: '3.8'
+
+# This is where we define our services (containers).
+services:
+  # The database service.
+  db:
+    # We use the official PostgreSQL image, version 13.
+    image: postgres:13
+    # A volume is used to persist the database data. Without this, all your data
+    # would be lost every time you restart the container.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    # Environment variables for configuring the PostgreSQL database.
+    # IMPORTANT: In a real project, these should be in a .env file and not hardcoded.
+    environment:
+      - POSTGRES_DB=sheba_cred_db
+      - POSTGRES_USER=sheba_cred_user
+      - POSTGRES_PASSWORD=sheba_cred_password
+
+  # The web service for our Django application.
+  web:
+    # This tells Docker Compose to build the image from the Dockerfile in the current directory.
+    build: .
+    # The command to run when the container starts. This overrides the CMD in the Dockerfile.
+    command: python manage.py runserver 0.0.0.0:8000
+    # This mounts our current project directory into the container's /app directory.
+    # This is fantastic for development, as changes you make to your local code
+    # will be immediately reflected in the running container without rebuilding.
+    volumes:
+      - .:/app
+    # This maps port 8000 on our local machine to port 8000 inside the container.
+    ports:
+      - "8000:8000"
+    # Environment variables for the Django application. We're reading the same values
+    # we used for the 'db' service to tell Django how to connect to it.
+    environment:
+      - DB_NAME=sheba_cred_db
+      - DB_USER=sheba_cred_user
+      - DB_PASS=sheba_cred_password
+      - DB_HOST=db  # 'db' is the hostname of our database service. Docker's internal networking handles this.
+      - DB_PORT=5432
+    # This makes our 'web' service dependent on the 'db' service. Docker Compose will
+    # ensure the 'db' service is started before the 'web' service.
+    depends_on:
+      - db
+
+# This defines the named volume we used for the database service.
+volumes:
+  postgres_data:
