@@ -1,8 +1,16 @@
 import React from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import LoginPage from './pages/Login'
+import SignUpPage from './pages/SignUp'
 
-const App = () => {
+const App: React.FC = () => {
   return (
-    <div className='text-4xl'>App</div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
