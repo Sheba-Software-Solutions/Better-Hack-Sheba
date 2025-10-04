@@ -1,15 +1,23 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import FormInput from './FormInput'
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // For now just log the values — replace with real auth later
-    // eslint-disable-next-line no-console
-    console.log('login', { email, password })
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await login(email, password);
+    if (result.success) {
+      navigate('/dashboard');
+    } else {
+      // eslint-disable-next-line no-alert
+      alert(result.error || 'Login failed');
+    }
   }
 
   return (
@@ -29,7 +37,7 @@ const LoginForm: React.FC = () => {
         id="password"
         name="password"
         type="password"
-        placeholder="••••••••"
+        placeholder="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />

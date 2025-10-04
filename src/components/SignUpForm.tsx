@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { useAuth } from '../contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 import FormInput from './FormInput'
 
 const SignUpForm: React.FC = () => {
@@ -9,13 +11,19 @@ const SignUpForm: React.FC = () => {
   const [touched, setTouched] = useState(false)
 
   const passwordsMatch = password === confirmPassword
+  const { register } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setTouched(true)
-    if (!passwordsMatch) return
-    // eslint-disable-next-line no-console
-    console.log('signup', { name, email, password })
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setTouched(true);
+    if (!passwordsMatch) return;
+    const result = await register(email, password, name);
+    if (result.success) {
+      navigate('/dashboard');
+    } else {
+      alert(result.error || 'Registration failed');
+    }
   }
 
   const isDisabled = !name || !email || !password || !confirmPassword || !passwordsMatch
