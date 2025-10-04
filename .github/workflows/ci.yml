@@ -2,60 +2,45 @@
 # File: /home/pirate/Documents/Projects/Better-auth/Sheba-Pass/Better-Hack-Sheba-Cred/.github/workflows/ci.yml
 #
 
-# A friendly name for our workflow, which will be displayed in the "Actions" tab of your GitHub repository.
 name: Django CI
 
-# This section defines when the workflow should run.
 on:
-  # Run it on every 'push' to the 'main' branch.
   push:
     branches: ["main"]
-  # Also run it on every 'pull_request' that targets the 'main' branch.
   pull_request:
     branches: ["main"]
 
-# A workflow run is made up of one or more "jobs" that can run sequentially or in parallel.
 jobs:
-  # We only have one job for now, which we'll call "build".
   build:
-    # The type of virtual machine to run the job on. "ubuntu-latest" is a good, standard choice.
     runs-on: ubuntu-latest
-
-    # A job is a sequence of "steps". Each step performs a specific action.
     steps:
-      # --- Step 1: Install system-level dependencies ---
-      # Our project requires the Tesseract OCR engine, which is not a Python package.
-      # We need to install it on the Ubuntu runner using the 'apt' package manager.
       - name: Install Tesseract OCR
         run: |
           sudo apt-get update
           sudo apt-get install -y tesseract-ocr
 
-      # --- Step 2: Check out your code ---
-      # This is a pre-made action that downloads your repository's code onto the runner.
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      # --- Step 3: Set up the Python environment ---
-      # This action sets up a specific version of Python for us.
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          # We specify the Python version we want to use. It's good practice to match
-          # the version you use in your local development.
           python-version: "3.11"
 
-      # --- Step 4: Install Python dependencies ---
-      # This step uses 'pip' to install all the packages listed in your requirements.txt file.
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # --- Step 5: Run tests ---
-      # This is the most critical step. It runs Django's built-in test command.
-      # If any test fails, this step will fail, and the entire CI run will be marked as failed.
-      # This prevents merging code with failing tests.
+      # --- This is the step that needs to be changed ---
       - name: Run Django tests
+        # We add an 'env' block to this step. All variables defined here
+        # will be set as environment variables for the duration of the 'run' command.
+        env:
+          DB_NAME: test_sheba_cred_db
+          DB_USER: test_user
+          DB_PASS: test_password
+          DB_HOST: localhost # For tests, a local service is fine, but we need to specify it.
+          DB_PORT: 5432
         run: |
           python manage.py test
