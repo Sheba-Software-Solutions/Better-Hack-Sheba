@@ -39,8 +39,15 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Third-party apps
+    "corsheaders",
     "rest_framework",
+    "rest_framework.authtoken",
     "rest_framework_api_key",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
     # Local apps
     "core",
     "wallet",
@@ -48,6 +55,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -125,6 +134,41 @@ USE_TZ = True
 STATIC_URL = "static/"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# --- Authentication Settings ---
+
+# Use our custom User model
+AUTH_USER_MODEL = "core.User"
+
+# Enable email as the primary authentication method
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_VERIFICATION = "none"  # Can be changed to "mandatory" later
+
+# Set up DRF to use JWT authentication
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+# Configure Simple JWT
+REST_AUTH = {
+    "USE_JWT": True,
+    "JWT_AUTH_COOKIE": "sheba-cred-auth",
+    "JWT_AUTH_REFRESH_COOKIE": "sheba-cred-refresh",
+    "REGISTER_SERIALIZER": "core.serializers.CustomRegisterSerializer",
+    "USER_DETAILS_SERIALIZER": "core.serializers.CustomUserDetailsSerializer",
+}
+
+# Add a site ID for allauth
+SITE_ID = 1
+
+# Allow all origins for now during development
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

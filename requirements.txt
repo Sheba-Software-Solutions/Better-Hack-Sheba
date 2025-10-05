@@ -11,3 +11,16 @@ Pillow
 djangorestframework-api-key
 thefuzz
 python-Levenshtein
+dj-rest-auth
+djangorestframework-simplejwt
+django-allauth
+
+# CORS support
+django-cors-headers
+
+# HTTP library
+requests
+
+# Environment variables
+python-dotenv
+dj-database-url

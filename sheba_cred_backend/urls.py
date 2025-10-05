@@ -23,4 +23,6 @@ urlpatterns = [
     path("api/wallet/", include("wallet.urls")),
     path("api/institution/", include("institutions.urls")),
     path("api/core/", include("core.urls")),
+    path("api/auth/", include("dj_rest_auth.urls")),
+    path("api/auth/registration/", include("dj_rest_auth.registration.urls")),
 ]
