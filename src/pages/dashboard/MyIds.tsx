@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Card } from "../../types/card";
 import CardRenderer from "../../components/CardRenderer";
 import CardDetailDialog from "../../components/CardDetailDialog";
@@ -9,10 +9,37 @@ import { Wallet, Plus } from "lucide-react";
 import { Button } from "../../components/ui/button";
 
 const MyIds = () => {
-  const cards: Card[] = cardsData as Card[];
+  const staticCards: Card[] = cardsData as Card[];
+  const [uploadedCards, setUploadedCards] = useState<Card[]>([]);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+
+  // Load uploaded cards from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('uploadedCards');
+    if (stored) {
+      try {
+        setUploadedCards(JSON.parse(stored));
+      } catch (e) {
+        console.error('Failed to parse uploaded cards:', e);
+      }
+    }
+  }, []);
+
+  // Save uploaded cards to localStorage whenever they change
+  useEffect(() => {
+    if (uploadedCards.length > 0) {
+      localStorage.setItem('uploadedCards', JSON.stringify(uploadedCards));
+    }
+  }, [uploadedCards]);
+
+  // Combine static and uploaded cards
+  const allCards = [...staticCards, ...uploadedCards];
+
+  const handleUploadSuccess = (newCard: Card) => {
+    setUploadedCards(prev => [...prev, newCard]);
+  };
 
   const handleCardClick = (card: Card) => {
     setSelectedCard(card);
@@ -46,7 +73,7 @@ const MyIds = () => {
 
         {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          {cards.map((card) => (
+          {allCards.map((card) => (
             <div key={card.id} className="animate-fade-in">
               <CardRenderer card={card} onClick={() => handleCardClick(card)} />
             </div>
@@ -64,10 +91,11 @@ const MyIds = () => {
         <UploadIdDialog 
           open={uploadDialogOpen}
           onOpenChange={setUploadDialogOpen}
+          onUploadSuccess={handleUploadSuccess}
         />
 
         {/* Empty State */}
-        {cards.length === 0 && (
+        {allCards.length === 0 && (
           <div className="text-center py-20">
             <Wallet className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold text-foreground mb-2">No cards yet</h3>

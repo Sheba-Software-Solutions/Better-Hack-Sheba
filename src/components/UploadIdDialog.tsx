@@ -22,9 +22,10 @@ import type { CardType } from "../types/card";
 interface UploadIdDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onUploadSuccess?: (card: any) => void;
 }
 
-const UploadIdDialog = ({ open, onOpenChange }: UploadIdDialogProps) => {
+const UploadIdDialog = ({ open, onOpenChange, onUploadSuccess }: UploadIdDialogProps) => {
   const [cardType, setCardType] = useState<CardType | "">("");
   const [photoPreview, setPhotoPreview] = useState<string>("");
   const [uploading, setUploading] = useState(false);
@@ -73,26 +74,79 @@ const UploadIdDialog = ({ open, onOpenChange }: UploadIdDialogProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!cardType) {
       toast.error("Please select an ID type");
       return;
     }
-    
+
     if (!photoPreview) {
       toast.error("Please upload a photo");
       return;
     }
 
     setUploading(true);
-    
+
     // Simulate upload delay
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
+    // Create the card object based on type
+    const baseCard = {
+      id: Date.now().toString(),
+      type: cardType,
+      fullName: formData.fullName,
+      issuedDate: formData.issuedDate,
+      expiryDate: formData.expiryDate,
+      photoUrl: photoPreview,
+    };
+
+    let newCard;
+    switch (cardType) {
+      case "drivers_license":
+        newCard = {
+          ...baseCard,
+          licenseNumber: formData.licenseNumber,
+          dob: formData.dob,
+          bloodType: formData.bloodType,
+          nationality: formData.nationality,
+        };
+        break;
+      case "national_id":
+        newCard = {
+          ...baseCard,
+          finNumber: formData.finNumber,
+          dob: formData.dob,
+        };
+        break;
+      case "kebele_id":
+        newCard = {
+          ...baseCard,
+          idNumber: formData.idNumber,
+          dob: formData.dob,
+          bloodType: formData.bloodType,
+          emergencyContact: formData.emergencyContact,
+        };
+        break;
+      case "coop_atm":
+        newCard = {
+          ...baseCard,
+          accountNumber: formData.accountNumber,
+          atmNumber: formData.atmNumber,
+        };
+        break;
+      default:
+        newCard = baseCard;
+    }
+
+    // Call the callback with the new card
+    if (onUploadSuccess) {
+      onUploadSuccess(newCard);
+    }
+
     toast.success("ID card uploaded successfully!");
     setUploading(false);
     onOpenChange(false);
-    
+
     // Reset form
     setCardType("");
     setPhotoPreview("");
