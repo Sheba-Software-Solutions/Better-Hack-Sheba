@@ -3,13 +3,16 @@ import { useState } from "react";
 import type { Card } from "../../types/card";
 import CardRenderer from "../../components/CardRenderer";
 import CardDetailDialog from "../../components/CardDetailDialog";
+import UploadIdDialog from "../../components/UploadIdDialog";
 import cardsData from "../../data/cardsData.json";
-import { Wallet } from "lucide-react";
+import { Wallet, Plus } from "lucide-react";
+import { Button } from "../../components/ui/button";
 
 const MyIds = () => {
   const cards: Card[] = cardsData as Card[];
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   const handleCardClick = (card: Card) => {
     setSelectedCard(card);
@@ -21,14 +24,23 @@ const MyIds = () => {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-primary rounded-2xl">
-              <Wallet className="w-8 h-8 text-primary-foreground" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-primary rounded-2xl">
+                <Wallet className="w-8 h-8 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-foreground">My Wallet</h1>
+                <p className="text-muted-foreground mt-1">Your digital identity cards</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold text-foreground">My Wallet</h1>
-              <p className="text-muted-foreground mt-1">Your digital identity cards</p>
-            </div>
+            <Button 
+              onClick={() => setUploadDialogOpen(true)}
+              className="hidden md:flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Upload New ID
+            </Button>
           </div>
         </div>
 
@@ -48,6 +60,12 @@ const MyIds = () => {
           onOpenChange={setDialogOpen}
         />
 
+        {/* Upload ID Dialog */}
+        <UploadIdDialog 
+          open={uploadDialogOpen}
+          onOpenChange={setUploadDialogOpen}
+        />
+
         {/* Empty State */}
         {cards.length === 0 && (
           <div className="text-center py-20">
@@ -56,6 +74,15 @@ const MyIds = () => {
             <p className="text-muted-foreground">Add your first digital ID card to get started</p>
           </div>
         )}
+
+        {/* Floating Action Button (Mobile) */}
+        <button
+          onClick={() => setUploadDialogOpen(true)}
+          className="md:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+          aria-label="Upload new ID"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
       </div>
     </div>
   );
