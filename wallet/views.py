@@ -12,13 +12,3 @@ from institutions.models import CredentialRecord
 from .models import Document
 from .parser import parse_credential_from_text
 from .serializers import DocumentSerializer
-
-
-class DocumentUploadView(generics.CreateAPIView):
-    queryset = Document.objects.all()
-    serializer_class = DocumentSerializer
-
-    permission_classes = [permissions.IsAuthenticated]
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
