@@ -1,17 +1,13 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import Logo from './Logo'
 
 const Header: React.FC = () => {
   return (
     <header className="w-full border-b border-gray-200 py-4 px-4 md:px-6 flex items-center justify-between relative">
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-black flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" className="h-5 w-5">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 2l2 4 4 .5-3 3 .8 4L12 12 6.2 13.5 7 9 4 6.5 8 6z" />
-          </svg>
-        </div>
-        <span className="font-semibold text-lg">Sheba Cred</span>
-      </div>
+      <Link to="/" className="flex items-center">
+        <Logo variant="dark" size="md" />
+      </Link>
 
       {/* Desktop nav */}
       <nav className="absolute left-1/2 -translate-x-1/2 hidden md:flex gap-8">

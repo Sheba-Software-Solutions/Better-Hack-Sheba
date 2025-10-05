@@ -137,7 +137,7 @@ const Home: React.FC = () => {
         </div>
       </motion.section>
 
-      <footer className="w-full border-t border-gray-200 py-6 text-center text-sm text-gray-600">© {new Date().getFullYear()} Sheba — All rights reserved</footer>
+      <footer className="w-full border-t border-gray-200 py-6 text-center text-sm text-gray-600">© {new Date().getFullYear()} Sheba Cred — All rights reserved</footer>
     </div>
   )
 }

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, Upload, CreditCard, FileText, User, Settings, LogOut } from 'lucide-react';
+import { Upload, CreditCard, FileText, User, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import Logo from './Logo';
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
@@ -28,9 +29,8 @@ const Sidebar = () => {
     <div className="min-h-screen bg-background flex">
       {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 inset-x-0 z-40 bg-gray-900 text-white border-b border-gray-800 flex items-center justify-between px-4 py-3">
-        <Link to="/" className="flex items-center gap-2">
-          <Shield className="h-6 w-6" />
-          <span className="font-semibold">Sheba-Cred</span>
+        <Link to="/" className="flex items-center">
+          <Logo variant="light" size="md" />
         </Link>
         <button
           onClick={() => setOpen((v) => !v)}
@@ -46,9 +46,8 @@ const Sidebar = () => {
       {/* Sidebar */}
       <aside className={`fixed md:static inset-y-0 left-0 z-50 w-72 md:w-64 bg-gray-900 border-r border-gray-800 flex flex-col transform transition-transform duration-200 ${open ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="p-6 border-b border-gray-800">
-          <Link to="/" className="flex items-center gap-2">
-            <Shield className="h-8 w-8 text-white" />
-            <span className="text-xl font-bold text-white">Sheba-Cred</span>
+          <Link to="/" className="flex items-center">
+            <Logo variant="light" size="lg" />
           </Link>
         </div>
 
