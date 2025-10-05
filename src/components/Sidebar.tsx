@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Shield, Upload, CreditCard, FileText, User, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,6 +7,7 @@ const Sidebar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -25,8 +26,25 @@ const Sidebar = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 inset-x-0 z-40 bg-gray-900 text-white border-b border-gray-800 flex items-center justify-between px-4 py-3">
+        <Link to="/" className="flex items-center gap-2">
+          <Shield className="h-6 w-6" />
+          <span className="font-semibold">Sheba-Cred</span>
+        </Link>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Open menu"
+          className="h-10 w-10 inline-flex items-center justify-center rounded-md border border-gray-700"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
       {/* Sidebar */}
-  <aside className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col">
+      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-72 md:w-64 bg-gray-900 border-r border-gray-800 flex flex-col transform transition-transform duration-200 ${open ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="p-6 border-b border-gray-800">
           <Link to="/" className="flex items-center gap-2">
             <Shield className="h-8 w-8 text-white" />
@@ -34,7 +52,7 @@ const Sidebar = () => {
           </Link>
         </div>
 
-  <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-2">
           <Link 
             to="/dashboard" 
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
@@ -112,8 +130,13 @@ const Sidebar = () => {
         </div>
       </aside>
 
+      {/* Overlay for mobile */}
+      {open && (
+        <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setOpen(false)} />
+      )}
+
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto w-full md:ml-0 pt-14 md:pt-0">
         <Outlet />
       </main>
     </div>

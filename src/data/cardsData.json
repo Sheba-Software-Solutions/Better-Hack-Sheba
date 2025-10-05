@@ -1,0 +1,46 @@
+[
+  {
+    "id": "1",
+    "type": "drivers_license",
+    "fullName": "Abebe Kebede",
+    "licenseNumber": "DL-2024-456789",
+    "dob": "1990-05-15",
+    "bloodType": "O+",
+    "nationality": "Ethiopian",
+    "issuedDate": "2022-03-20",
+    "expiryDate": "2027-03-20",
+    "photoUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop"
+  },
+  {
+    "id": "2",
+    "type": "national_id",
+    "fullName": "Tigist Mengistu",
+    "dob": "1988-11-22",
+    "finNumber": "FIN-889-2024-AA",
+    "issuedDate": "2020-06-15",
+    "expiryDate": "2030-06-15",
+    "photoUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop"
+  },
+  {
+    "id": "3",
+    "type": "kebele_id",
+    "fullName": "Dawit Alemayehu",
+    "idNumber": "KB-2024-112233",
+    "dob": "1995-08-10",
+    "bloodType": "A+",
+    "emergencyContact": "+251-911-234567",
+    "issuedDate": "2023-01-12",
+    "expiryDate": "2028-01-12",
+    "photoUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop"
+  },
+  {
+    "id": "4",
+    "type": "coop_atm",
+    "fullName": "Sara Tesfaye",
+    "accountNumber": "1234567890123",
+    "atmNumber": "5678 9012 3456 7890",
+    "issuedDate": "2021-09-05",
+    "expiryDate": "2026-09-05",
+    "photoUrl": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop"
+  }
+]

@@ -74,6 +74,21 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* Card-specific colors */
+    --license-primary: 195 75% 65%;
+    --license-secondary: 195 85% 85%;
+    --national-primary: 195 50% 18%;
+    --national-secondary: 195 50% 25%;
+    --kebele-primary: 180 85% 55%;
+    --kebele-secondary: 180 75% 70%;
+    --atm-primary: 200 80% 60%;
+    --atm-secondary: 0 0% 98%;
+    
+    /* Shadows and effects */
+    --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --card-shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    
+    --radius: 0.75rem;
 }
 
 .dark {

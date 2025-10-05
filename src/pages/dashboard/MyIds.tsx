@@ -1,87 +1,59 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { Card } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
-import { CreditCard, CheckCircle } from 'lucide-react';
 
-interface ID {
-  id: string;
-  userId: string;
-  type: string;
-  idNumber: string;
-  name: string;
-  birthdate: string;
-  verifiedAt: string;
-}
+import { useState } from "react";
+import type { Card } from "../../types/card";
+import CardRenderer from "../../components/CardRenderer";
+import CardDetailDialog from "../../components/CardDetailDialog";
+import cardsData from "../../data/cardsData.json";
+import { Wallet } from "lucide-react";
 
 const MyIds = () => {
-  const { user } = useAuth();
-  const [ids, setIds] = useState<ID[]>([]);
+  const cards: Card[] = cardsData as Card[];
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      const storedIds = JSON.parse(localStorage.getItem('sheba-cred-ids') || '[]');
-      const userIds = storedIds.filter((id: ID) => id.userId === user.id);
-      setIds(userIds);
-    }
-  }, [user]);
+  const handleCardClick = (card: Card) => {
+    setSelectedCard(card);
+    setDialogOpen(true);
+  };
 
   return (
-    <div className="p-8">
-      <div className="max-w-5xl">
-        <h1 className="text-3xl font-bold mb-2 text-foreground">My IDs</h1>
-        <p className="text-muted-foreground mb-8">
-          Your verified identity documents
-        </p>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Header */}
+        <div className="mb-12">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-primary rounded-2xl">
+              <Wallet className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-foreground">My Wallet</h1>
+              <p className="text-muted-foreground mt-1">Your digital identity cards</p>
+            </div>
+          </div>
+        </div>
 
-        {ids.length === 0 ? (
-          <Card className="p-12 text-center">
-            <CreditCard className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2 text-foreground">No Verified IDs Yet</h3>
-            <p className="text-muted-foreground">
-              Verify your National ID in the Profile section to get started.
-            </p>
-          </Card>
-        ) : (
-          <div className="grid md:grid-cols-2 gap-6">
-            {ids.map((id) => (
-              <Card key={id.id} className="p-6 shadow-card hover:shadow-card-hover transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
-                      <CreditCard className="h-6 w-6 text-accent" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-foreground">{id.type}</h3>
-                      <p className="text-sm text-muted-foreground">ID: {id.idNumber}</p>
-                    </div>
-                  </div>
-                  <Badge variant="secondary" className="bg-accent/10 text-accent">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Verified
-                  </Badge>
-                </div>
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          {cards.map((card) => (
+            <div key={card.id} className="animate-fade-in">
+              <CardRenderer card={card} onClick={() => handleCardClick(card)} />
+            </div>
+          ))}
+        </div>
 
-                <div className="space-y-2 pt-4 border-t border-border">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Name:</span>
-                    <span className="text-sm font-medium text-foreground">{id.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Birthdate:</span>
-                    <span className="text-sm font-medium text-foreground">
-                      {new Date(id.birthdate).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Verified:</span>
-                    <span className="text-sm font-medium text-foreground">
-                      {new Date(id.verifiedAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            ))}
+        {/* Card Detail Dialog */}
+        <CardDetailDialog 
+          card={selectedCard}
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+        />
+
+        {/* Empty State */}
+        {cards.length === 0 && (
+          <div className="text-center py-20">
+            <Wallet className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-xl font-semibold text-foreground mb-2">No cards yet</h3>
+            <p className="text-muted-foreground">Add your first digital ID card to get started</p>
           </div>
         )}
       </div>
