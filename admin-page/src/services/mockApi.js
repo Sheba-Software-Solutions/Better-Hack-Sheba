@@ -54,6 +54,23 @@ export const api = {
   async listDocuments(status) {
     return documents.filter(d => !status || d.status === status)
   },
+  async addDocument({ fullName, dateIssued, title, serialNumber }) {
+    const id = `DOC-${String(Math.floor(Math.random()*9000+1000)).padStart(3,'0')}`
+    const doc = {
+      id,
+      type: title || 'Certificate',
+      owner: fullName || 'Unknown',
+      institution: 'Custom',
+      uploadedAt: new Date().toISOString(),
+      status: 'pending',
+      fullName: fullName || '',
+      dateIssued: dateIssued || '',
+      title: title || '',
+      serialNumber: serialNumber || '',
+    }
+    documents.unshift(doc)
+    return doc
+  },
   async verifyDocument(id) {
     const doc = documents.find(d=>d.id===id)
     if (doc) doc.status = 'verified'
