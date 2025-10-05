@@ -1,12 +1,9 @@
-# We're using version 3.8 of the Docker Compose file format.
-version: '3.8'
-
 # This is where we define our services (containers).
 services:
   # The database service.
   db:
-    # We use the official PostgreSQL image, version 13.
-    image: postgres:13
+    # We use the official PostgreSQL image, version 16, which is a stable LTS release.
+    image: postgres:16
     # A volume is used to persist the database data. Without this, all your data
     # would be lost every time you restart the container.
     volumes:
@@ -28,7 +25,7 @@ services:
     # This is fantastic for development, as changes you make to your local code
     # will be immediately reflected in the running container without rebuilding.
     volumes:
-      - .:/app
+      - .:/app:z
     # This maps port 8000 on our local machine to port 8000 inside the container.
     ports:
       - "8000:8000"
@@ -38,7 +35,7 @@ services:
       - DB_NAME=sheba_cred_db
       - DB_USER=sheba_cred_user
       - DB_PASS=sheba_cred_password
-      - DB_HOST=db  # 'db' is the hostname of our database service. Docker's internal networking handles this.
+      - DB_HOST=db # 'db' is the hostname of our database service. Docker's internal networking handles this.
       - DB_PORT=5432
     # This makes our 'web' service dependent on the 'db' service. Docker Compose will
     # ensure the 'db' service is started before the 'web' service.

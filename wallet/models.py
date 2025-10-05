@@ -1,71 +1,54 @@
+#
+# File: /home/pirate/Documents/Projects/Better-auth/Sheba-Pass/Better-Hack-Sheba-Cred/wallet/models.py
+#
 from django.db import models
 from django.conf import settings
-import hashlib
-import pytesseract
-from PIL import Image
+
+# We must import the CredentialRecord model from our new 'institutions' app
+# so that we can create a relationship (ForeignKey) to it.
+from institutions.models import CredentialRecord
 
 
 class Document(models.Model):
-    VERIFICATION_STATUS_CHOICES = [
-        ("PENDING", "Pending"),
-        ("VERIFIED", "Verified"),
-        ("REJECTED", "Rejected"),
-    ]
+    """
+    Represents a user's uploaded document. This now acts as a user's "claim" or "attempt"
+    to link to a pre-registered CredentialRecord from an institution.
+    """
 
+    # A link to the user who uploaded the document.
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="documents"
     )
-    document_file = models.FileField(upload_to="documents/")
-    document_type = models.CharField(
-        max_length=100
-    )  # e.g., 'Transcript', 'Certificate'
-    verification_status = models.CharField(
-        max_length=10, choices=VERIFICATION_STATUS_CHOICES, default="PENDING"
+
+    # The actual file (PDF, JPG, etc.) that the user uploaded from the app.
+    document_file = models.FileField(upload_to="user_documents/")
+
+    # This is the most important field in the new design. It's a link to the trusted
+    # CredentialRecord.
+    # By default, it is empty (null=True).
+    # Only after a successful hash match will this field be populated.
+    # If this field is not null, the document is considered "Verified".
+    verified_credential = models.ForeignKey(
+        CredentialRecord,
+        on_delete=models.SET_NULL,  # If the trusted record is deleted, just set this field to null.
+        null=True,  # This field can be empty in the database.
+        blank=True,  # This field is optional in forms.
+        related_name="user_documents",
     )
+
+    # We still store the text extracted by OCR. This is useful for debugging
+    # and for our future "fuzzy matching" logic.
     extracted_text = models.TextField(blank=True, null=True)
-    document_hash = models.CharField(max_length=64, blank=True, null=True)  # SHA256
+
+    # A timestamp that is automatically set when the document is first uploaded.
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.document_type} for {self.user.email}"
-
-    def save(self, *args, **kwargs):
-        is_new = self.pk is None
-        super().save(*args, **kwargs)
-
-        if is_new and not self.document_hash:
-            self.document_file.open("rb")
-            file_content = self.document_file.read()
-
-            sha256_hash = hashlib.sha256()
-            sha256_hash.update(file_content)
-            self.document_hash = sha256_hash.hexdigest()
-
-            try:
-                self.extracted_text = pytesseract.image_to_string(
-                    Image.open(self.document_file.path)
-                )
-            except Exception as e:
-                print(f"Error during OCR: {e}")
-                self.extracted_text = "OCR failed for this document."
-
-            self.document_file.close()
-
-            super().save(
-                update_fields=["document_hash", "extracted_text", "updated_at"]
-            )
+        # This provides a dynamic, human-readable name based on the verification status.
+        status = "Verified" if self.verified_credential else "Unverified"
+        return f"Document from {self.user.email} ({status})"
 
 
-class VerifiableCredential(models.Model):
-    document = models.OneToOneField(
-        Document, on_delete=models.CASCADE, primary_key=True, related_name="credential"
-    )
-    credential_id = models.CharField(
-        max_length=255, unique=True
-    )  # Could be a UUID or DID
-    issued_at = models.DateTimeField(auto_now_add=True)
-    qr_code = models.ImageField(upload_to="qrcodes/", blank=True, null=True)
-
-    def __str__(self):
-        return f"VC for {self.document.document_type} - {self.document.user.email}"
+# NOTE: The old `VerifiableCredential` model that was previously in this file is now obsolete.
+# Its role has been fully replaced by the much more robust `CredentialRecord` model
+# in the 'institutions' app. We have deleted it.
