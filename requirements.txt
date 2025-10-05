@@ -8,3 +8,4 @@ psycopg2-binary
 # OCR and Image Processing
 pytesseract
 Pillow
+djangorestframework-api-key

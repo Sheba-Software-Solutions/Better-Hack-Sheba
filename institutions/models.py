@@ -9,6 +9,7 @@ from django.db import models
 
 # settings allows us to refer to our custom User model easily (AUTH_USER_MODEL).
 from django.conf import settings
+from rest_framework_api_key.models import AbstractAPIKey
 
 
 class Institution(models.Model):
@@ -125,3 +126,15 @@ class CredentialRecord(models.Model):
         # The hashing function requires a byte string, so we encode our string into UTF-8 bytes.
         # We then create the SHA-256 hash and get its hexadecimal string representation.
         return hashlib.sha256(canonical_string.encode("utf-8")).hexdigest()
+
+
+class InstitutionAPIKey(AbstractAPIKey):
+    """
+    A custom API Key model that links a key directly to an Institution.
+    """
+
+    institution = models.ForeignKey(
+        Institution,
+        on_delete=models.CASCADE,
+        related_name="api_keys",
+    )
