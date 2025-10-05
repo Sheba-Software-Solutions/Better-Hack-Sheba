@@ -42,11 +42,29 @@ const CardDetailDialog = ({ card, open, onOpenChange }: CardDetailDialogProps) =
     }
   };
 
+  const getCardGradient = () => {
+    switch (card.type) {
+      case 'drivers_license':
+        return 'linear-gradient(135deg, hsl(var(--license-primary)) 0%, hsl(var(--license-secondary)) 100%)';
+      case 'national_id':
+        return 'linear-gradient(135deg, hsl(var(--national-primary)) 0%, hsl(var(--national-secondary)) 100%)';
+      case 'kebele_id':
+        return 'linear-gradient(135deg, hsl(var(--kebele-primary)) 0%, hsl(var(--kebele-secondary)) 100%)';
+      case 'coop_atm':
+        return 'linear-gradient(135deg, hsl(var(--atm-primary)) 0%, hsl(var(--atm-secondary)) 100%)';
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl">
+        <DialogHeader 
+          className="rounded-t-lg -mx-6 -mt-6 px-6 pt-6 pb-4 text-white relative overflow-hidden"
+          style={{ background: getCardGradient() }}
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+          <DialogTitle className="flex items-center gap-3 text-2xl relative z-10">
             {getIcon()}
             {getTitle()}
           </DialogTitle>
