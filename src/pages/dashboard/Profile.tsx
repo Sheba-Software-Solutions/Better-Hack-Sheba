@@ -5,7 +5,7 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
-import { Upload, CheckCircle } from 'lucide-react';
+import { Upload, CheckCircle, X, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Profile = () => {
@@ -13,12 +13,28 @@ const Profile = () => {
   const [idNumber, setIdNumber] = useState('');
   const [birthdate, setBirthdate] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string>('');
   const [isVerifying, setIsVerifying] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setFilePreview('');
+    const fileInput = document.getElementById('idFile') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
   };
 
   const handleVerifyId = (e: React.FormEvent) => {
@@ -31,26 +47,48 @@ const Profile = () => {
 
     setIsVerifying(true);
 
-    // Mock verification process
-    setTimeout(() => {
+    // Convert file to base64 and store
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      // Update user verification status
       updateUser({ hasVerifiedId: true });
       
-      // Store National ID info
+      // Store National ID info with file data
       const ids = JSON.parse(localStorage.getItem('sheba-cred-ids') || '[]');
-      ids.push({
+      const newId = {
         id: Date.now().toString(),
         userId: user?.id,
         type: 'National ID',
         idNumber,
         name: user?.name,
         birthdate,
+        fileName: selectedFile.name,
+        fileData: reader.result, // Store the file data
         verifiedAt: new Date().toISOString(),
-      });
+      };
+      ids.push(newId);
       localStorage.setItem('sheba-cred-ids', JSON.stringify(ids));
       
       toast.success('National ID verified successfully!');
       setIsVerifying(false);
-    }, 2000);
+      
+      // Reset form
+      setIdNumber('');
+      setBirthdate('');
+      setSelectedFile(null);
+      setFilePreview('');
+      
+      // Reset file input
+      const fileInput = document.getElementById('idFile') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+    };
+    
+    reader.onerror = () => {
+      toast.error('Failed to read file. Please try again.');
+      setIsVerifying(false);
+    };
+    
+    reader.readAsDataURL(selectedFile);
   };
 
   return (
@@ -82,7 +120,7 @@ const Profile = () => {
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4 text-foreground">Verify Your National ID</h2>
             <p className="text-sm text-muted-foreground mb-6">
-              Before uploading other documents, you must first verify your National ID. This ensures the security and authenticity of your identity wallet.
+              Verify your National ID to enhance the security and authenticity of your identity wallet. Verified users receive priority processing for their documents.
             </p>
 
             <form onSubmit={handleVerifyId} className="space-y-6">
@@ -121,24 +159,49 @@ const Profile = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="idFile">Upload National ID</Label>
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-accent transition-colors">
-                  <Input
-                    id="idFile"
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <label htmlFor="idFile" className="cursor-pointer">
-                    <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground mb-1">
-                      {selectedFile ? selectedFile.name : 'Click to upload your National ID'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      PNG, JPG, or PDF (max. 5MB)
-                    </p>
-                  </label>
-                </div>
+                {!filePreview ? (
+                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-accent transition-colors">
+                    <Input
+                      id="idFile"
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <label htmlFor="idFile" className="cursor-pointer">
+                      <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground mb-1">
+                        Click to upload your National ID
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        PNG, JPG, or PDF (max. 5MB)
+                      </p>
+                    </label>
+                  </div>
+                ) : (
+                  <div className="relative border-2 border-border rounded-lg p-4">
+                    <button
+                      type="button"
+                      onClick={handleRemoveFile}
+                      className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/90 z-10"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                    {selectedFile?.type.startsWith('image/') ? (
+                      <img
+                        src={filePreview}
+                        alt="ID Preview"
+                        className="w-full h-64 object-contain rounded"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-64">
+                        <FileText className="h-16 w-16 text-muted-foreground mb-4" />
+                        <p className="text-sm font-medium">{selectedFile?.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">PDF Document</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <Button 

@@ -5,28 +5,39 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card } from '../../components/ui/card';
 import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Upload, AlertCircle } from 'lucide-react';
+import { Upload, AlertCircle, X, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
 const UploadDocument = () => {
   const { user } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string>('');
   const [documentType, setDocumentType] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setFilePreview('');
+    const fileInput = document.getElementById('file') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!user?.hasVerifiedId) {
-      toast.error('Please verify your National ID first in the Profile section');
-      return;
-    }
 
     if (!selectedFile || !documentType) {
       toast.error('Please select a document and specify its type');
@@ -35,26 +46,35 @@ const UploadDocument = () => {
 
     setIsUploading(true);
 
-    // Mock upload process
-    setTimeout(() => {
+    // Mock upload process - convert file to base64 for storage
+    const reader = new FileReader();
+    reader.onloadend = () => {
       const certificates = JSON.parse(localStorage.getItem('sheba-cred-certificates') || '[]');
       const newCertificate = {
         id: Date.now().toString(),
-        userId: user.id,
+        userId: user?.id,
         name: documentType,
         fileName: selectedFile.name,
-        status: 'pending',
+        fileData: reader.result, // Store the file data
+        status: user?.hasVerifiedId ? 'verified' : 'pending',
         uploadedAt: new Date().toISOString(),
       };
       
       certificates.push(newCertificate);
       localStorage.setItem('sheba-cred-certificates', JSON.stringify(certificates));
       
-      toast.success('Document uploaded successfully! Awaiting verification.');
+      toast.success('Document uploaded successfully!');
       setSelectedFile(null);
+      setFilePreview('');
       setDocumentType('');
       setIsUploading(false);
-    }, 1500);
+      
+      // Reset file input
+      const fileInput = document.getElementById('file') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+    };
+    
+    reader.readAsDataURL(selectedFile);
   };
 
   return (
@@ -66,10 +86,10 @@ const UploadDocument = () => {
         </p>
 
         {!user?.hasVerifiedId && (
-          <Alert className="mb-6 border-destructive">
-            <AlertCircle className="h-4 w-4 text-destructive" />
-            <AlertDescription className="text-destructive">
-              You must verify your National ID in your Profile before uploading documents.
+          <Alert className="mb-6 border-yellow-500 bg-yellow-50">
+            <AlertCircle className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-800">
+              For enhanced security, consider verifying your National ID in your Profile section.
             </AlertDescription>
           </Alert>
         )}
@@ -89,30 +109,55 @@ const UploadDocument = () => {
 
             <div className="space-y-2">
               <Label htmlFor="file">Choose File</Label>
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-accent transition-colors">
-                <Input
-                  id="file"
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <label htmlFor="file" className="cursor-pointer">
-                  <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {selectedFile ? selectedFile.name : 'Click to upload or drag and drop'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    PNG, JPG, or PDF (max. 5MB)
-                  </p>
-                </label>
-              </div>
+              {!filePreview ? (
+                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-accent transition-colors">
+                  <Input
+                    id="file"
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <label htmlFor="file" className="cursor-pointer">
+                    <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Click to upload or drag and drop
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      PNG, JPG, or PDF (max. 5MB)
+                    </p>
+                  </label>
+                </div>
+              ) : (
+                <div className="relative border-2 border-border rounded-lg p-4">
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="absolute top-2 right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/90 z-10"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  {selectedFile?.type.startsWith('image/') ? (
+                    <img
+                      src={filePreview}
+                      alt="Preview"
+                      className="w-full h-64 object-contain rounded"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-64">
+                      <FileText className="h-16 w-16 text-muted-foreground mb-4" />
+                      <p className="text-sm font-medium">{selectedFile?.name}</p>
+                      <p className="text-xs text-muted-foreground mt-1">PDF Document</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <Button 
               type="submit" 
               className="w-full"
-              disabled={!user?.hasVerifiedId || isUploading}
+              disabled={isUploading}
             >
               {isUploading ? 'Uploading...' : 'Upload Document'}
             </Button>

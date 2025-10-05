@@ -39,14 +39,7 @@ const MyCertificates = () => {
     if (user) {
       const storedCerts = JSON.parse(localStorage.getItem('sheba-cred-certificates') || '[]');
       const userCerts = storedCerts.filter((cert: Certificate) => cert.userId === user.id);
-      
-      // Mock some as verified for demo
-      const updatedCerts = userCerts.map((cert: Certificate, index: number) => ({
-        ...cert,
-        status: index % 2 === 0 ? 'verified' : 'pending',
-      }));
-      
-      setCertificates(updatedCerts);
+      setCertificates(userCerts);
     }
   }, [user]);
 
